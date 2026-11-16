@@ -7,6 +7,7 @@ It combines **live backend security probes**, a **parameterized Python 3 & Bash 
 ---
 
 ## Table of Contents
+- [Documentation Suite](#documentation-suite)
 - [Key Capabilities](#key-capabilities)
 - [1. Overview & Lab Configuration](#1-overview--lab-configuration)
 - [2. Live VAPT Analyzer & Network Probe](#2-live-vapt-analyzer--network-probe)
@@ -20,6 +21,19 @@ It combines **live backend security probes**, a **parameterized Python 3 & Bash 
 - [Local Setup & Running](#local-setup--running)
 - [Firebase Cloud Sync (Optional)](#firebase-cloud-sync-optional)
 - [Authorized Use & Ethical Disclaimer](#authorized-use--ethical-disclaimer)
+
+---
+
+## Documentation Suite
+
+Detailed technical and user guides live in the [`docs/`](./docs/) directory:
+
+| Guide | What It Covers |
+| --- | --- |
+| [**User & Lab Setup Guide**](./docs/USER_AND_LAB_GUIDE.md) | Local installation (including Windows PowerShell & path notes), VirtualBox + Kali isolation setup, and step-by-step usage for all 5 workbench tabs. |
+| [**System Architecture**](./docs/ARCHITECTURE.md) | React + Express + Vite `middlewareMode` flow, state rehydration, Light / Obsidian Jade Dark theme & A4 print CSS, ZIP builder, and SSRF protections. |
+| [**Backend API Reference**](./docs/API_REFERENCE.md) | Exact request/response schemas, validation limits, and status codes for `/api/health`, `/api/parse-nmap`, `/api/probe-port`, `/api/inspect-url`, and `/api/cve-search`. |
+| [**Firebase & Data Model**](./docs/FIREBASE_AND_DATA_MODEL.md) | TypeScript interfaces, `localStorage` vs. Cloud Firestore sync, collection paths, schema constraints, and `firestore.rules` enforcement. |
 
 ---
 
@@ -116,6 +130,7 @@ Generates a structured penetration testing report with both **Report Preview** a
 ├── firebase-blueprint.json           # Firestore schema blueprint
 ├── firestore.rules                   # Firestore security rules
 ├── vite.config.ts                    # Vite + Tailwind v4 + PWA config
+├── docs/                             # Detailed Architecture, API, Data Model & Lab Guides
 └── src/
     ├── App.tsx                       # Main workspace shell, sidebar/drawer, theme & state sync
     ├── index.css                     # Tailwind v4 theme tokens, hover transitions, A4 print CSS
@@ -158,10 +173,12 @@ cp .env.example .env
 ```
 
 ### 3. Run in Development Mode
-Starts the Express server + Vite frontend on **http://localhost:3000**:
+Starts the Express server + Vite frontend and logs `Open in browser: http://localhost:3000`:
 ```bash
 npm run dev
 ```
+
+> **Windows Path Note:** Avoid placing the project inside folders containing `&` (e.g., `Phase-1 & 2`), as `cmd.exe` splits paths at `&` when invoking `tsx.cmd`. Move the project to a clean path (such as `D:\VAPT-Lab-Studio-main`) or run directly with `node server.ts` on Node `v22.18+` / `v24+`, then open **http://localhost:3000** (not `0.0.0.0:3000`). See the [User & Lab Setup Guide](./docs/USER_AND_LAB_GUIDE.md) for details.
 
 ### 4. Type-Check & Build for Production
 ```bash
