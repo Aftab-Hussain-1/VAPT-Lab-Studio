@@ -1,0 +1,6 @@
+{
+  "name": "IqraSec Phase 2 Studio",
+  "description": "Metasploitable 2 VAPT lab workbench, Python & Bash automation tool builder, and professional PDF report studio for IqraSec Academy Phase 2.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

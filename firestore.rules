@@ -1,0 +1,149 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isVerifiedUser() && request.auth.uid == userId;
+    }
+
+    function isValidWorkspace(data, userId) {
+      return data.keys().hasAll([
+          'ownerUid',
+          'title',
+          'configJson',
+          'milestonesJson',
+          'vectorsJson',
+          'sectionsJson',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerUid',
+          'title',
+          'configJson',
+          'milestonesJson',
+          'vectorsJson',
+          'sectionsJson',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.ownerUid is string
+        && data.ownerUid == userId
+        && data.ownerUid.size() <= 128
+        && data.title is string
+        && data.title.size() >= 1
+        && data.title.size() <= 120
+        && data.configJson is string
+        && data.configJson.size() <= 12000
+        && data.milestonesJson is string
+        && data.milestonesJson.size() <= 20000
+        && data.vectorsJson is string
+        && data.vectorsJson.size() <= 120000
+        && data.sectionsJson is string
+        && data.sectionsJson.size() <= 80000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidScan(data, userId) {
+      return data.keys().hasAll([
+          'ownerUid',
+          'targetIp',
+          'osGuess',
+          'openPortCount',
+          'findingCount',
+          'summaryJson',
+          'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerUid',
+          'targetIp',
+          'osGuess',
+          'openPortCount',
+          'findingCount',
+          'summaryJson',
+          'createdAt'
+        ])
+        && data.ownerUid is string
+        && data.ownerUid == userId
+        && data.ownerUid.size() <= 128
+        && data.targetIp is string
+        && data.targetIp.size() >= 1
+        && data.targetIp.size() <= 120
+        && data.osGuess is string
+        && data.osGuess.size() <= 200
+        && data.openPortCount is number
+        && data.openPortCount >= 0
+        && data.findingCount is number
+        && data.findingCount >= 0
+        && data.summaryJson is string
+        && data.summaryJson.size() <= 120000
+        && data.createdAt is timestamp;
+    }
+
+    match /users/{userId}/workspaces/{workspaceId} {
+      allow get: if isOwner(userId) && isValidId(workspaceId);
+      allow list: if isOwner(userId) && resource.data.ownerUid == request.auth.uid;
+
+      allow create: if isOwner(userId)
+        && isValidId(workspaceId)
+        && isValidWorkspace(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isOwner(userId)
+        && isValidId(workspaceId)
+        && isValidWorkspace(incoming(), userId)
+        && incoming().ownerUid == existing().ownerUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'title',
+          'configJson',
+          'milestonesJson',
+          'vectorsJson',
+          'sectionsJson',
+          'updatedAt'
+        ]);
+
+      allow delete: if isOwner(userId) && isValidId(workspaceId);
+    }
+
+    match /users/{userId}/scans/{scanId} {
+      allow get: if isOwner(userId) && isValidId(scanId);
+      allow list: if isOwner(userId) && resource.data.ownerUid == request.auth.uid;
+
+      allow create: if isOwner(userId)
+        && isValidId(scanId)
+        && isValidScan(incoming(), userId)
+        && incoming().createdAt == request.time;
+
+      allow delete: if isOwner(userId) && isValidId(scanId);
+    }
+  }
+}

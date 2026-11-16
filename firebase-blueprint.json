@@ -1,0 +1,128 @@
+{
+  "entities": {
+    "LabWorkspace": {
+      "title": "LabWorkspace",
+      "description": "Stores a user's customized VAPT lab configuration, branding, automation tool settings, playbook evidence, and report sections.",
+      "type": "object",
+      "properties": {
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the workspace owner.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "description": "Display title of the lab engagement.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "configJson": {
+          "type": "string",
+          "description": "Serialized lab configuration object.",
+          "maxLength": 12000
+        },
+        "milestonesJson": {
+          "type": "string",
+          "description": "Serialized milestone checklist.",
+          "maxLength": 20000
+        },
+        "vectorsJson": {
+          "type": "string",
+          "description": "Serialized playbook vectors and evidence.",
+          "maxLength": 120000
+        },
+        "sectionsJson": {
+          "type": "string",
+          "description": "Serialized VAPT report narrative sections.",
+          "maxLength": 80000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-modified timestamp."
+        }
+      },
+      "required": [
+        "ownerUid",
+        "title",
+        "configJson",
+        "milestonesJson",
+        "vectorsJson",
+        "sectionsJson",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SavedScan": {
+      "title": "SavedScan",
+      "description": "Stores a parsed Nmap XML/text scan analysis and correlated findings for a user.",
+      "type": "object",
+      "properties": {
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the scan owner.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "targetIp": {
+          "type": "string",
+          "description": "Target IPv4 or hostname.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "osGuess": {
+          "type": "string",
+          "description": "Detected operating system fingerprint.",
+          "maxLength": 200
+        },
+        "openPortCount": {
+          "type": "number",
+          "description": "Number of discovered open ports."
+        },
+        "findingCount": {
+          "type": "number",
+          "description": "Number of correlated vulnerabilities."
+        },
+        "summaryJson": {
+          "type": "string",
+          "description": "Serialized openPorts and findings payload.",
+          "maxLength": 120000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        }
+      },
+      "required": [
+        "ownerUid",
+        "targetIp",
+        "osGuess",
+        "openPortCount",
+        "findingCount",
+        "summaryJson",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/workspaces/{workspaceId}": {
+      "schema": {
+        "$ref": "#/entities/LabWorkspace"
+      },
+      "description": "Private user-scoped VAPT lab workspaces."
+    },
+    "/users/{userId}/scans/{scanId}": {
+      "schema": {
+        "$ref": "#/entities/SavedScan"
+      },
+      "description": "Private user-scoped parsed Nmap scan records."
+    }
+  }
+}
